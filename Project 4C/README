@@ -1,0 +1,44 @@
+NAME: Belle Lerdworatawee
+EMAIL: bellelee@g.ucla.edu
+ID: 105375663
+
+-----------------------------------------------------------
+
+File Descriptions:
+
+lab4c_tcp.c: This file is the actual source code for the project and it uses API's to connect the
+Beaglebone to a server. The Beaglebone periodically reads the temperature from a sensor and sends
+the information to the server. It also polls for input from the server and executes commands accordingly.
+This is all done without encrypting the information being passed back and forth.
+
+lab4c_tls.c: This file is the actual source code for the project and it uses API's to connect the
+Beaglebone to a server. It performs the same function as lab4c_tcp.c, however, this uses OpenSSL
+libraries to encrypt the data being passed back and forth. 
+
+Makefile: This file compiles all the source code, Makefile, and README into a compressed tar file.
+
+README: This file contains my beaglebone serial number as well as my personal information.
+
+Beaglebone serial number: BBGW17100610
+
+-----------------------------------------------------------
+
+Sources:
+
+https://stackoverflow.com/questions/4246588/fprintf-like-function-for-file-descriptors-i-e-int-fd-instead-of-file-fp
+https://linux.die.net/man/3/dprintf
+I tried to use fprintf to send the formatted strings to a file descriptor, however, I didn't realize that
+fprintf accepts pointers of FILE type only. So I read this post and found that there's a function called
+dprintf that will function similarly to fprintf but accepts file descriptors.
+
+https://stackoverflow.com/questions/18079340/using-getopt-in-c-with-non-option-arguments
+I wasn't sure how to use getopt_long to process arguments without -- in front so I read this post.
+It turns out that getopt_long preprocesses argv and moves the ones without -- to the end. Based on this,
+I still kept the switch case implementation to process the arguments with -- and then did a separate check
+outside of the switch case for the port number.
+
+http://www.cplusplus.com/reference/cstdio/sprintf/
+I didn't know how to print a formatted string to a buffer and I found sprintf. I followed the syntax on this
+site for reference.
+
+I referenced all 3 TA's slides.
