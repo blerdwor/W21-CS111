@@ -1,0 +1,51 @@
+NAME: Belle Lerdworatawee
+EMAIL: bellelee@g.ucla.edu
+ID: 105375663
+
+-----------------------------------------------------------
+
+File Descriptions:
+
+lab3a.c: This file contains the actual C program. It takes in an image file and scans
+the super block, group descriptors, block bitmap, inode bitmap, inode, and directory
+entries. Then it outputs csv's based on the filesystem's contents.
+
+Makefile: This file gives instructions to the make command on how to compile the code. It
+also removes the files that it creates (namely the executables and the zipped file). It 
+also will generate a new tarball containing the Makefile, source code, README, 
+compressing all the necessary files. 
+
+README: This file contains all the information about the program as well as my
+personal information.
+
+ext2_fs.h: This file was provided and it contains all the structs we need for reading
+the image. This includes structs like the super block struct. It also contains constants
+like EXT2_N_BLOCKS.
+
+-----------------------------------------------------------
+
+Sources:
+
+https://www.youtube.com/watch?v=csrq72jGZis
+I watched this YouTube video to get a better understanding of what file systems are
+and then get a closer look at the organization in an ext2 file system. I was confused on 
+the difference between blocks and block groups, and how the inode bitmap worked.
+This video helped me understand the high level structure better and how the different
+pieces of data are mapped out.
+
+http://www.nongnu.org/ext2-doc/ext2.html
+I referenced this extensively as it had everything about the struct information and
+what kind of information each of the fields held. This was like my Bible for the lab.
+
+http://www.science.smith.edu/~nhowe/262/oldlabs/ext2.html
+This was my second Bible for this lab. It had helpful examples of what information
+we can glean from the superblock part and I used some of the example code for formatting
+my print statements. The examples and paragraphs helped me understand how to parse the
+information from the image file.
+
+https://www.techonthenet.com/c_language/standard_library_functions/time_h/gmtime.php
+https://www.techonthenet.com/c_language/standard_library_functions/time_h/strftime.php
+I referenced these for the syntax and how to use gmtime to convert the time to GMT
+and how to use the strftime to easily wrie the date and time to string.
+
+I referenced all 3 TA's slides.
