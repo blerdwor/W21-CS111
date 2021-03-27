@@ -1,0 +1,235 @@
+Total: 208 samples
+     169  81.2%  81.2%      208 100.0% th_worker
+      28  13.5%  94.7%       28  13.5% SortedList_lookup
+       3   1.4%  96.2%        3   1.4% ?? /usr/src/debug////////glibc-2.17-c758a686/string/../sysdeps/x86_64/multiarch/strcmp-sse42.S:1734
+       2   1.0%  97.1%        2   1.0% ?? /usr/src/debug////////glibc-2.17-c758a686/string/../sysdeps/x86_64/multiarch/strcmp-sse42.S:203
+       1   0.5%  97.6%        1   0.5% ?? /usr/src/debug////////glibc-2.17-c758a686/string/../sysdeps/x86_64/multiarch/strcmp-sse42.S:161
+       1   0.5%  98.1%        1   0.5% ?? /usr/src/debug////////glibc-2.17-c758a686/string/../sysdeps/x86_64/multiarch/strcmp-sse42.S:165
+       1   0.5%  98.6%        1   0.5% ?? /usr/src/debug////////glibc-2.17-c758a686/string/../sysdeps/x86_64/multiarch/strcmp-sse42.S:204
+       1   0.5%  99.0%        1   0.5% ?? /usr/src/debug////////glibc-2.17-c758a686/string/../sysdeps/x86_64/multiarch/strcmp-sse42.S:211
+       1   0.5%  99.5%        1   0.5% ?? /usr/src/debug////////glibc-2.17-c758a686/string/../sysdeps/x86_64/multiarch/strcmp-sse42.S:1734
+       1   0.5% 100.0%       11   5.3% SortedList_insert
+       0   0.0% 100.0%      208 100.0% ?? /usr/src/debug////////glibc-2.17-c758a686/misc/../sysdeps/unix/sysv/linux/x86_64/clone.S:118
+       0   0.0% 100.0%      208 100.0% start_thread
+ROUTINE ====================== th_worker in /u/cs/ugrad/belle/CS111/Week7/lab2_list.c
+   169    208 Total samples (flat / cumulative)
+     .      .   36:   str[3] = '\0';
+     .      .   37:   
+     .      .   38:   return str;
+     .      .   39: }
+     .      .   40: 
+---
+     .      .   41: void* th_worker(void* start) {
+     .      .   42: 
+     .      .   43:   struct timespec mutex_start, mutex_stop;
+     .      .   44:   int start_index = *((int *) start);
+     .      .   45:   int end_index = start_index + iter;
+     .      .   46:   int th_ID = start_index / iter;
+     .      .   47: 
+     .      .   48:   // printf("%ld Passed start index: %d\n", pthread_self(), start_index);
+     .      .   49: 
+     .      .   50:   // insert
+     .      .   51:   for (int i = start_index; i < end_index; i++) {
+     .      .   52:     int list_index = *(pool[i].key) % list_num;
+     .      .   53:     if (sync_ch == 'm') {
+     .      .   54:       clock_gettime(CLOCK_MONOTONIC, &mutex_start);              
+     .      .   55:       pthread_mutex_lock(&m_locks[list_index]);
+     .      .   56:       clock_gettime(CLOCK_MONOTONIC, &mutex_stop);    
+     .      .   57:     }
+     .      .   58:     else if (sync_ch == 's')
+   125    125   59:       while(__sync_lock_test_and_set(&s_locks[list_index], 1));
+     .      .   60:     // printf("%ld insert list_idx: %d\n", pthread_self(), list_index);
+     .     11   61:     SortedList_insert(&head[list_index], &pool[i]);
+     .      .   62: 
+     .      .   63:     if (sync_ch == 'm')  {
+     .      .   64:       pthread_mutex_unlock(&m_locks[list_index]);
+     .      .   65:       long total_mutex_time = (mutex_stop.tv_sec - mutex_start.tv_sec)*BILLION + \
+     .      .   66:                          (mutex_stop.tv_nsec - mutex_start.tv_nsec);
+     .      .   67:       wait_times[th_ID] += total_mutex_time;
+     .      .   68:     }
+     .      .   69:     else if (sync_ch == 's')
+     .      .   70:       __sync_lock_release(&s_locks[list_index]);
+     .      .   71:   }
+     .      .   72:   
+     .      .   73:   // check length
+     .      .   74:   if (sync_ch == 'm') { 
+     .      .   75:     clock_gettime(CLOCK_MONOTONIC, &mutex_start);
+     .      .   76:     for (int i = 0; i < list_num; i++)
+     .      .   77:       pthread_mutex_lock(&m_locks[i]);
+     .      .   78:     clock_gettime(CLOCK_MONOTONIC, &mutex_stop);
+     .      .   79:     long total_mutex_time = (mutex_stop.tv_sec - mutex_start.tv_sec)*BILLION + \
+     .      .   80:                          (mutex_stop.tv_nsec - mutex_start.tv_nsec);
+     .      .   81:     wait_times[th_ID] += total_mutex_time;
+     .      .   82:   }
+     .      .   83:   else if (sync_ch == 's') {
+     .      .   84:     for (int i = 0; i < list_num; i++)
+     .      .   85:       while(__sync_lock_test_and_set(&s_locks[i], 1)); 
+     .      .   86:   }
+     .      .   87: 
+     .      .   88:   for (int i = 0; i < list_num; i++) {
+     .      .   89:     if (SortedList_length(&head[i]) < 0) {
+     .      .   90:       fprintf(stderr, "Error the list is corrupted\n");
+     .      .   91:       exit(2);
+     .      .   92:     }
+     .      .   93:   }
+     .      .   94:     
+     .      .   95:   if (sync_ch == 'm')  {
+     .      .   96:     for (int i = 0; i < list_num; i++)
+     .      .   97:       pthread_mutex_unlock(&m_locks[i]);
+     .      .   98:   }
+     .      .   99:   else if (sync_ch == 's') {
+     .      .  100:     for (int i = 0; i < list_num; i++)
+     .      .  101:       __sync_lock_release(&s_locks[i]);
+     .      .  102:   }
+     .      .  103: 
+     .      .  104:   // lookup and delete
+     .      .  105:   for (int i = start_index; i < end_index; i++) {
+     .      .  106:     int list_index = *(pool[i].key) % list_num;
+     .      .  107:     if (sync_ch == 'm') {
+     .      .  108:       clock_gettime(CLOCK_MONOTONIC, &mutex_start);
+     .      .  109:       pthread_mutex_lock(&m_locks[list_index]);
+     .      .  110:       clock_gettime(CLOCK_MONOTONIC, &mutex_stop);
+     .      .  111:     }
+     .      .  112:     else if (sync_ch == 's')
+    44     44  113:       while(__sync_lock_test_and_set(&s_locks[list_index], 1));
+     .      .  114: 
+     .      .  115:     // printf("%ld delete list_idx: %d\n", pthread_self(), list_index);
+     .     28  116:     SortedListElement_t* elem = SortedList_lookup(&head[list_index], pool[i].key);
+     .      .  117:     if (elem == NULL) {
+     .      .  118:       fprintf(stderr, "Error the key cannot be found\n");
+     .      .  119:       exit(2);
+     .      .  120:     }
+     .      .  121:     if (SortedList_delete(elem) == 1) {
+     .      .  122:       fprintf(stderr, "Error the list is corrupted.\n");
+     .      .  123:       exit(2);
+     .      .  124:     }
+     .      .  125:   
+     .      .  126:     if (sync_ch == 'm')  {
+     .      .  127:       pthread_mutex_unlock(&m_locks[list_index]);
+     .      .  128:       long total_mutex_time = (mutex_stop.tv_sec - mutex_start.tv_sec)*BILLION + \
+     .      .  129:                          (mutex_stop.tv_nsec - mutex_start.tv_nsec);
+     .      .  130:       wait_times[th_ID] += total_mutex_time;
+     .      .  131:     }
+     .      .  132:     else if (sync_ch == 's')
+     .      .  133:       __sync_lock_release(&s_locks[list_index]);
+     .      .  134:   }
+     .      .  135: 
+     .      .  136:   return NULL;
+     .      .  137: }
+---
+     .      .  138: 
+     .      .  139: void seg_handler() {
+     .      .  140:   fprintf(stderr, "Segmentation error caught\n");
+     .      .  141:   exit(2);
+     .      .  142: }
+ROUTINE ====================== th_worker in /u/cs/ugrad/belle/CS111/Week7/lab2_list.c
+   169    208 Total samples (flat / cumulative)
+     .      .   36:   str[3] = '\0';
+     .      .   37:   
+     .      .   38:   return str;
+     .      .   39: }
+     .      .   40: 
+---
+     .      .   41: void* th_worker(void* start) {
+     .      .   42: 
+     .      .   43:   struct timespec mutex_start, mutex_stop;
+     .      .   44:   int start_index = *((int *) start);
+     .      .   45:   int end_index = start_index + iter;
+     .      .   46:   int th_ID = start_index / iter;
+     .      .   47: 
+     .      .   48:   // printf("%ld Passed start index: %d\n", pthread_self(), start_index);
+     .      .   49: 
+     .      .   50:   // insert
+     .      .   51:   for (int i = start_index; i < end_index; i++) {
+     .      .   52:     int list_index = *(pool[i].key) % list_num;
+     .      .   53:     if (sync_ch == 'm') {
+     .      .   54:       clock_gettime(CLOCK_MONOTONIC, &mutex_start);              
+     .      .   55:       pthread_mutex_lock(&m_locks[list_index]);
+     .      .   56:       clock_gettime(CLOCK_MONOTONIC, &mutex_stop);    
+     .      .   57:     }
+     .      .   58:     else if (sync_ch == 's')
+   125    125   59:       while(__sync_lock_test_and_set(&s_locks[list_index], 1));
+     .      .   60:     // printf("%ld insert list_idx: %d\n", pthread_self(), list_index);
+     .     11   61:     SortedList_insert(&head[list_index], &pool[i]);
+     .      .   62: 
+     .      .   63:     if (sync_ch == 'm')  {
+     .      .   64:       pthread_mutex_unlock(&m_locks[list_index]);
+     .      .   65:       long total_mutex_time = (mutex_stop.tv_sec - mutex_start.tv_sec)*BILLION + \
+     .      .   66:                          (mutex_stop.tv_nsec - mutex_start.tv_nsec);
+     .      .   67:       wait_times[th_ID] += total_mutex_time;
+     .      .   68:     }
+     .      .   69:     else if (sync_ch == 's')
+     .      .   70:       __sync_lock_release(&s_locks[list_index]);
+     .      .   71:   }
+     .      .   72:   
+     .      .   73:   // check length
+     .      .   74:   if (sync_ch == 'm') { 
+     .      .   75:     clock_gettime(CLOCK_MONOTONIC, &mutex_start);
+     .      .   76:     for (int i = 0; i < list_num; i++)
+     .      .   77:       pthread_mutex_lock(&m_locks[i]);
+     .      .   78:     clock_gettime(CLOCK_MONOTONIC, &mutex_stop);
+     .      .   79:     long total_mutex_time = (mutex_stop.tv_sec - mutex_start.tv_sec)*BILLION + \
+     .      .   80:                          (mutex_stop.tv_nsec - mutex_start.tv_nsec);
+     .      .   81:     wait_times[th_ID] += total_mutex_time;
+     .      .   82:   }
+     .      .   83:   else if (sync_ch == 's') {
+     .      .   84:     for (int i = 0; i < list_num; i++)
+     .      .   85:       while(__sync_lock_test_and_set(&s_locks[i], 1)); 
+     .      .   86:   }
+     .      .   87: 
+     .      .   88:   for (int i = 0; i < list_num; i++) {
+     .      .   89:     if (SortedList_length(&head[i]) < 0) {
+     .      .   90:       fprintf(stderr, "Error the list is corrupted\n");
+     .      .   91:       exit(2);
+     .      .   92:     }
+     .      .   93:   }
+     .      .   94:     
+     .      .   95:   if (sync_ch == 'm')  {
+     .      .   96:     for (int i = 0; i < list_num; i++)
+     .      .   97:       pthread_mutex_unlock(&m_locks[i]);
+     .      .   98:   }
+     .      .   99:   else if (sync_ch == 's') {
+     .      .  100:     for (int i = 0; i < list_num; i++)
+     .      .  101:       __sync_lock_release(&s_locks[i]);
+     .      .  102:   }
+     .      .  103: 
+     .      .  104:   // lookup and delete
+     .      .  105:   for (int i = start_index; i < end_index; i++) {
+     .      .  106:     int list_index = *(pool[i].key) % list_num;
+     .      .  107:     if (sync_ch == 'm') {
+     .      .  108:       clock_gettime(CLOCK_MONOTONIC, &mutex_start);
+     .      .  109:       pthread_mutex_lock(&m_locks[list_index]);
+     .      .  110:       clock_gettime(CLOCK_MONOTONIC, &mutex_stop);
+     .      .  111:     }
+     .      .  112:     else if (sync_ch == 's')
+    44     44  113:       while(__sync_lock_test_and_set(&s_locks[list_index], 1));
+     .      .  114: 
+     .      .  115:     // printf("%ld delete list_idx: %d\n", pthread_self(), list_index);
+     .     28  116:     SortedListElement_t* elem = SortedList_lookup(&head[list_index], pool[i].key);
+     .      .  117:     if (elem == NULL) {
+     .      .  118:       fprintf(stderr, "Error the key cannot be found\n");
+     .      .  119:       exit(2);
+     .      .  120:     }
+     .      .  121:     if (SortedList_delete(elem) == 1) {
+     .      .  122:       fprintf(stderr, "Error the list is corrupted.\n");
+     .      .  123:       exit(2);
+     .      .  124:     }
+     .      .  125:   
+     .      .  126:     if (sync_ch == 'm')  {
+     .      .  127:       pthread_mutex_unlock(&m_locks[list_index]);
+     .      .  128:       long total_mutex_time = (mutex_stop.tv_sec - mutex_start.tv_sec)*BILLION + \
+     .      .  129:                          (mutex_stop.tv_nsec - mutex_start.tv_nsec);
+     .      .  130:       wait_times[th_ID] += total_mutex_time;
+     .      .  131:     }
+     .      .  132:     else if (sync_ch == 's')
+     .      .  133:       __sync_lock_release(&s_locks[list_index]);
+     .      .  134:   }
+     .      .  135: 
+     .      .  136:   return NULL;
+     .      .  137: }
+---
+     .      .  138: 
+     .      .  139: void seg_handler() {
+     .      .  140:   fprintf(stderr, "Segmentation error caught\n");
+     .      .  141:   exit(2);
+     .      .  142: }

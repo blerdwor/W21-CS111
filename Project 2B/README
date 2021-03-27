@@ -1,0 +1,137 @@
+NAME: Belle Lerdworatawee
+EMAIL: bellelee@g.ucla.edu
+ID: 105375663
+
+-----------------------------------------------------------
+
+File Descriptions:
+
+lab2_list.c: This file contains the actual C program. The file generates threads based on
+user input and these threads all use a function to modify a shared linked list. It can also
+break the list into smaller sub lists in order to boost performace. This is because threads
+spend less time iterating through the list since the lists are smaller. These shared linked
+lists can be protected with mutex locks and spinlocks.
+
+Makefile: This file gives instructions to the make command on how to compile the code. It
+also removes the files that it creates (namely the executables and the zipped file). It 
+also will generate a new tarball containing the Makefile, source code, README, graphs,
+and data, compressing all the necessary files. 
+
+README: This file contains all the information about the program as well as my
+personal information.
+
+lab2b_1.png: This graph displays the throughput of mutex protected runs and spinlock
+protected runs. It plots 1E9 / cost per operation vs number of threads. 
+
+lab2b_2.png: This graph focuses on mutex protected runs. It plots the average wait time
+per lock vs number of threads and the cost per operation vs number of threads.
+
+lab2b_3.png: This graph displays the total number of successful runs with yield. It also
+plots the successful runs with yield for mutex or spinlock protected runs vs number of
+threads. The number of lists remains constant during this trial.
+
+lab2b_4.png: This graph displays the throughput vs number of threads for a variety of 
+different number of sublists. These runs are protected by mutex.
+
+lab2b_5.png: This graph displays the throughput vs number of threads for a variety of 
+different number of sublists. These runs are protected by spinlocks.
+
+lab2_list.csv: This holds comma separated values which are the output of the lab2_list executable.
+There are 8 entries in each line, which are the name of the test; number of threads; number of iterations;
+number of lists; total number of operations performed; total runtime; average time per operation (in ns);
+total time spent acquuirng a mutex lock.
+
+lab2b.gp: This is the plotting script that reads data from lab2b_list.csv and graphs the data. It outputs 
+5 graphs in total.
+
+SortedList.c: This has 4 Linked List operations: insert, delete, loopkup and get length. The insert
+function inserts the list nodes in ascending order so that the list is sorted. 
+
+SortedList.h: This is the header file for to make a sorted linked list. It holds all the function
+prototypes as well as declare extern variables to signfy when to yield. It also contains the struct
+for the circularly-linked Linked List implementation. Every list node has a string key, a pointer to 
+the next node, and a pointer to the previous node.
+
+-----------------------------------------------------------
+
+QUESTION 2.3.1 - Cycles in the basic list implementation:
+
+    Where do you believe most of the cycles are spent in the 1 and 2-thread list tests ?
+    Why do you believe these to be the most expensive parts of the code?
+    Where do you believe most of the time/cycles are being spent in the high-thread spin-lock tests?
+    Where do you believe most of the time/cycles are being spent in the high-thread mutex tests?
+
+I think that for a low number of threads, most of the time/cycles are spent in list operations
+as there are at most 2000 list nodes to search through. There's not much chance for lock
+contention as there aren't that many threads, and I think that the cost of inserting/searching/
+getting the length of the list outweights the cost of acquiring a lock as there's not much waiting
+to be done.  For high-thread spinlock tests, I think that the time is spent spinning and waiting for 
+another thread to release the lock. A high number of threads means that there is a higher chance
+for lock contention and when there are enough threads, spinlock costs outweigh the list operations. 
+For mutex, I think that the time is spent on the process of locking. This requires a trap into the
+kernel which means that context switch needs to occur, and this has high overhead. When the list
+has few nodes, this is more expensive versus if there are more nodes in the list because the cost
+outweights the cost of list operations.
+
+QUESTION 2.3.2 - Execution Profiling:
+
+    Where (what lines of code) are consuming most of the cycles when the spin-lock version of the list 
+    exerciser is run with a large number of threads?
+    Why does this operation become so expensive with large numbers of threads? 
+
+Based on the profile.out page, the th_worker function is comsuming the most cycles specifically at lines
+59 and 113 which are the lines that utilize spin locks. This operations becomes more expensive as the
+number of threads grows because there is higher chance for lock contention. When the number of threads
+grows, only 1 thread may have the lock at a time. This means that more threads are spinning while waiting
+which wastes more CPU cycles.
+ 
+QUESTION 2.3.3 - Mutex Wait Time:
+Look at the average time per operation (vs. # threads) and the average wait-for-mutex time (vs. #threads).
+
+    Why does the average lock-wait time rise so dramatically with the number of contending threads?
+    Why does the completion time per operation rise (less dramatically) with the number of contending threads?
+    How is it possible for the wait time per operation to go up faster (or higher) than the completion time per operation?
+
+The average lock-wait time rises much more steeply as the number of threads increases because the more locks
+there are, the longer threads need to wait for each other to release it. As said previously, more threads means 
+more chances of lock contention and so now more threads spend time waiting for a lock to be released. The time
+per operation increases with the number of threads because there are more context switches to get the lock. 
+Additionally the wait time is also factored into this. The wait time increases at a faster rate than the completion
+time because this is the sum of how long each thread waited. The completion time, however, is just the time for the
+entire for loop to create all the threads, run th_worker and join. It doesn't account for the overlapping waiting
+period of threads. The wait-for-lock time is more accurate because it's per lock.
+
+QUESTION 2.3.4 - Performance of Partitioned Lists
+
+    Explain the change in performance of the synchronized methods as a function of the number of lists.
+    Should the throughput continue increasing as the number of lists is further increased? If not, explain why not.
+    It seems reasonable to suggest the throughput of an N-way partitioned list should be equivalent to the throughput 
+    of a single list with fewer (1/N) threads. Does this appear to be true in the above curves? If not, explain why not.
+
+As the number of lists increased, the performance increased as in more oeprations could be completed per second. 
+That is the general trend for both the mutex and spinlock protected runs. The chance of seeing a lock contention
+for the same list also decreases. The throughput should increase until there's one list for every list node. At this
+point, inserting/searching/deleting will take O(1). None of the graphs really display this. For instance, we can look
+graph lab2b_4 and observe that a single list with 4 threads has less throughput than the run with 4-lists and 1 thread.
+The suggestion is not entirely reasonble because it assumes that the cost of acquiring a lock is equal to the cost of
+list operations. The shorter lists reduce the cost of list operations like insert and lookup becase there's less list nodes
+to iterate over. There's also less chance for threads to wait over the same lock since each sub list has it's own lock
+whereas the single list only can let one thread access it at a time. 
+
+-----------------------------------------------------------
+
+Sources:
+
+https://docs.oracle.com/cd/E19120-01/open.solaris/816-5137/6mba5vq11/index.html
+I read this article because I suspected that there was a mutex deadlock somewhere in my code. My program kept
+freezing, however, the problem was actually due to me trying to use an uninitialized variable. 
+
+http://personalpages.to.infn.it/~mignone/Numerical_Algorithms/gnuplot.pdf
+I read this because I was unsure on how to set some of the ranges for the plotting script.
+
+https://unix.stackexchange.com/questions/155551/how-to-debug-a-bash-script
+When my program froze while running the sanity script, I tried to debug this in gdb but then I learned that you
+can't debug in gdb. So after some googling, I found this article that gave examples of bash debugging code. I used
+these to print out which lines the program was getting stuck on and used this to debug the program.
+
+I referenced all 3 TA's slides.
