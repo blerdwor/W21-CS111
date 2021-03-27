@@ -1,0 +1,207 @@
+NAME: Belle Lerdworatawee
+EMAIL: bellelee@g.ucla.edu
+ID: 105375663
+
+-----------------------------------------------------------
+
+File Descriptions:
+
+lab2_add.c: This file contains the actual C program. The file generates threads based on
+user input and these threads all use a function to modify a shared variable. It can also
+protect this shared region with mutex locks, spinlocks, or perform a compare and swap
+operation which is atomic.
+
+lab2_list.c: This file contains the actual C program. The file generates threads based on
+user input and these threads all use a function to modify a shared linked list. It can also
+protect this shared region with mutex locks, spinlocks, or perform a compare and swap
+operation which is atomic.
+
+Makefile: This file gives instructions to the make command on how to compile the code. It
+also removes the files that it creates (namely the executables and the zipped file). It 
+also will generate a new tarball containing the Makefile, source code, and README, 
+compressing all the necessary files. 
+
+README: This file contains all the information about the program as well as my
+personal information.
+
+lab2_add-1.png: This graph displays the threads and iterations required to generate a failure 
+both with and without yields. 
+
+lab2_add-2.png: This graph displays the average time per operation both with and without yields. 
+
+lab2_add-3.png: This graph displays the average time per 1 thread operations vs. the number of 
+iterations. The yield option is not supplied.
+
+lab2_add-4.png: This graph displays the number of threads and iterations that can run successfully 
+with yields under each of the synchronization options (none, mutex, spin, compare-and-swap).
+
+lab2_add-5.png: This graph displays the average time per operation vs. the number of threads. Each
+of the operations were ran unprotected or protected -- mutex, spin-lock, compare-and-swap. Yield
+is not supplied. 
+
+lab2_list-1.png: This graph displays the average time per 1 thread operation vs. number of iterations.
+None of the operations had lock protections. 
+
+lab2_list-2.png: This graph displays the number of threads and iterations required to generate a failure
+both with and without yields. The different yield combinations that were tried out were i,d,il, dl.
+
+lab2_list-3.png: This graph displayes how many iterations can run without failure. The runs were protected 
+with either mutex or spin-lock protection, and the 4 yield combinations from above were tested out. 
+
+lab2_list-4.png: This graph displays the corrected time per operation vs the number of threads for each 
+synchronization option (none or spin-lock or mutex). 
+
+lab2_add.csv: This holds comma separated values which are the output of the lab2_add executable.
+There are 7 entries in each line, which are the name of the test; number of threads; number of iterations;
+total number of operations performed; total run time (in ns); average time per operation (in ns); the 
+final count.
+
+lab2_list.csv: This holds comma separated values which are the output of the lab2_list executable.
+There are 7 entries in each line, which are the name of the test; number of threads; number of iterations;
+number of lists; total number of operations performed; total runtime; average time per operation (in ns).
+
+lab2_add.gp: This is the provided plotting script that reads data from lab2_add.csv and graphs
+the data. It outputs 5 graphs.
+
+lab2_list.gp: This is the provided plotting script that reads data from lab2_list.csv and graphs
+the data. It outputs 4 graphs.
+
+SortedList.c: This has 4 Linked List operations: insert, delete, loopkup and get length. The insert
+function inserts the list nodes in ascending order so that the list is sorted. 
+
+SortedList.h: This is the header file for to make a sorted linked list. It holds all the function
+prototypes as well as declare extern variables to signfy when to yield. It also contains the struct
+for the circularly-linked Linked List implementation. Every list node has a string key, a pointer to 
+the next node, and a pointer to the previous node.
+
+-----------------------------------------------------------
+
+QUESTION 2.1.1 - causing conflicts:
+    Why does it take many iterations before errors are seen?
+    Why does a significantly smaller number of iterations so seldom fail?
+
+It takes a lot of iterations for errors to appear because as the number of iterations 
+increases, the longer it takes for a thread to finish its work. When the number of iterations
+is small, a single thread can finish its work before a new thread is created that could
+potentially access the critical section at the same time. When I testing it out, with only
+2 threads, I needed more than 10,000 iterations to see a failure. With more than 10
+threads, I needed about 100 iterations to see a failure.
+
+QUESTION 2.1.2 - cost of yielding:
+
+    Why are the --yield runs so much slower?
+    Where is the additional time going?
+    Is it possible to get valid per-operation timings if we are using the --yield option?
+    If so, explain how. If not, explain why not. 
+
+sched_yield is called by the thread to relinquish its turn on the CPU, allow other threads
+to run, and be placed at the back of the queue. This incurs context switching which causes 
+overhead which is where the time goes. If the thread gives up its CPU access and rescheduled 
+right away then that creates a busy, unnecessary loop on the CPU.  I don't think that that is 
+possible because the per-operation timings that we collect includes the context switch which 
+isn't part of the operation. There isn't a viable way to collect the time of the context switch
+to take away from the per-operation.
+
+QUESTION 2.1.3 - measurement errors:
+
+    Why does the average cost per operation drop with increasing iterations?
+    If the cost per iteration is a function of the number of iterations, how do we know how many 
+    iterations to run (or what the "correct" cost is)?
+
+The average cost per operation drops with increasing iterations because the cost of creating a
+new thread is more expensive than the cost per iteration. More iterations means more work per 
+that single thread. The more work you require the thread to perform, the more "worth" it it is to 
+create that thread and you see an increase in efficiency. Based on my graph, it seems like an inverse
+function. The average cost per iteration starts to level out near high number of iterations. So if I
+ran the program for higher number of iterations and saw more of a flat live near the end, that 
+would most likely be the true cost per operation as a function of the number of iterations.
+
+QUESTION 2.1.4 - costs of serialization:
+
+    Why do all of the options perform similarly for low numbers of threads?
+    Why do the three protected operations slow down as the number of threads rises?
+
+For low numbers of threads, there's less "fighting" over locks as less threads spend time waiting in
+spin-lock and less threads. There's less chance of a race condition or lock contention so the cost per
+operation is roughly the same for all. As the number of threads increase, more threads need to wait for
+the lock to be released and thus the cost per operation increases for all 3 protection methods. Looking 
+at lab2_add-5.png, we can observe that the CAS protected method is the fastest which makes sense
+because it utilizes atomic instructions and then the spin one is the slowest because threads waste time while waiting for the lock to be released. 
+
+QUESTION 2.2.1 - scalability of Mutex
+
+    Compare the variation in time per mutex-protected operation vs the number of threads in Part-1 
+    (adds) and Part-2 (sorted lists).
+    Comment on the general shapes of the curves, and explain why they have this shape.
+    Comment on the relative rates of increase and differences in the shapes of the curves, and offer 
+    an explanation for these differences. 
+
+Both the graph from Part-1 and Part-2 display a positive trend while the graph. The Part-1 has a lower initial
+cost per operation than the one from Part-2 but later it also increases more. They both are shaped like this 
+because as you increase the number of threads, there's a higher chance of lock contention and so more threads
+spend time waiting for the lock to be released. If the scale on the graphs were linear, then the graph would
+display more of a log shape and this means that the increase at an exponentially decreasing rate. The add graph
+actually seems to grow at a slower exponential rate than the list one before peaking at some level. The list graph 
+just keeps growing. This may be because the add one just needed to modify a simple number which was two
+operations whereas the list one needed to traverse, insert, loopup, and delete a node. This clearly is more
+operations so the cost per operation hasn't found that asymptote yet where there are enough threads to make 
+the program run efficiently.   
+
+QUESTION 2.2.2 - scalability of spin locks
+
+    Compare the variation in time per protected operation vs the number of threads for list operations 
+    protected by Mutex vs Spin locks. Comment on the general shapes of the curves, and explain why 
+    they have this shape.
+    Comment on the relative rates of increase and differences in the shapes of the curves, and offer 
+    an explanation for these differences. 
+
+At first, I just had the mutex and spin-locks outside of the insert/lookup/delete code however this resulted
+in shockingly low times. So then I changed to code to put the mutex and spin-locks inside the for loops right 
+before I execute insert/lookup/delete. This resulted in more accurate looking times however the mutex lock
+seems to have higher cost than spin-lock as the number of threads increase which is surprising. Both the mutex 
+and spin-lock protected runs increase in cost per operation as the number of threads increase. This is most likely
+due to the higher probability of lock contention and thus threads wait longer for other threads to release the 
+lock. The mutex one grows at a faster rate then the spin-lock one and this might be because mutex have slower
+acquires and releases but don't waste cycles. So the spin-lock cost might not be growing as fast as the mutex one
+because the cost spent acquiring the lock is less than that of a mutex one, but it still follows the mutex one somewhat
+closely due to the wasted cycle time while waiting.    
+
+-----------------------------------------------------------
+
+Sources:
+
+https://users.pja.edu.pl/~jms/qnx/help/watcom/clibref/qnx/clock_gettime.html
+I referenced this for the clock_gettime function syntax and how to use it because I wasn't sure how
+to use it. I learned about the time struct and what it contains so I used the data inside to track the time.
+
+https://stackoverflow.com/questions/1352749/multiple-arguments-to-function-called-by-pthread-create
+I used this StackOverflow article to help figure out how to pass multiple arguments to a thread.
+I didn't know that there was supposed to be a struct that you pass in and I also didn't know that I
+needed to create another function that calls the original add function. At first, I modified the add
+function but later in the spec I realized that's not what we were supposed to do. After reading this article,
+I realized that we're supposed to create a valid function of (void*) return type and then call the add
+inside this function.
+
+https://stackoverflow.com/questions/40551362/bitwise-operation-in-c
+I wasn't sure how to get the yield to be two or more values for options like --yield=idl so I researched this
+and found out that bitwise operators can be used like arithmetic operators. 
+
+https://courses.engr.illinois.edu/cs241/fa2010/ppt/10-pthread-examples.pdf
+I was running into a lot of issues with passing in the right type to the thread_worker function in pthread_create.
+I found this powerpoint slide which had multiple examples of how to pass in a number, or a string. So this helped
+me figure out what exactly I should pass in.
+
+https://people.duke.edu/~hpgavin/gnuplot.html
+After running into issues with plotting the data, I needed to read the gnuplot scripts that graph the data. However
+I was very unfamiliar with the syntax and referenced this website on how to read the plot commands.
+
+http://gcc.gnu.org/onlinedocs/gcc-4.4.3/gcc/Atomic-Builtins.html
+I also read this to get a better understanding what the atomic builtins were and how to use them.
+
+https://matklad.github.io/2020/01/04/mutexes-are-faster-than-spinlocks.html
+I was seeing unexpected results on the graphs so I decided to take a closer look and read up on it.
+I had always thought that spin-locks were slower than mutexes but now I realize that it's actually
+slower to acuire/release a mutex lock but mutex doesn't waste CPU cycles. So there are pros and
+cons to each that depend on the situation.
+
+I referenced all 3 TA's slides.
