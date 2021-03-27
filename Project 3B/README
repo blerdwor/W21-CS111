@@ -1,0 +1,37 @@
+NAME: Belle Lerdworatawee
+EMAIL: bellelee@g.ucla.edu
+ID: 105375663
+
+-----------------------------------------------------------
+
+File Descriptions:
+
+lab3b.py: This file contains the python code to parse csv files and determine if the
+filesystem is corrupted or not. It reads the data line by line and saves the information
+into structs. Then it has 3 functions that parse the data and determine if the blocks,
+inodes, or directories have any inconsistencies.
+
+Makefile: This file gives instructions to the make command on how to compile the code. It
+also removes the files that it creates (namely the executables and the zipped file). It 
+also will generate a new tarball containing the Makefile, source code, and README. It
+creates a hardlink between the python code and the executable name lab3b.
+
+README: This file contains all the information about the program as well as my
+personal information.
+
+-----------------------------------------------------------
+
+Sources:
+
+https://docs.python.org/2/library/sys.html#sys.exit
+I used this in supplement to documentation on the sys module because I wasn't sure
+how to report to stderr.
+
+https://www.geeksforgeeks.org/working-csv-files-python/
+https://realpython.com/python-csv/#parsing-csv-files-with-pythons-built-in-csv-library
+https://docs.python.org/3/library/csv.html
+I used these to brush up on how to use the csv library as I had never used it before.
+I referenced the example code on how to open and parse the rows of a csv. It was very
+convenient to be able to extract the values from the row exactly like an array.
+
+I referenced all 3 TA's slides.
