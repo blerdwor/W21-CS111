@@ -1,0 +1,40 @@
+NAME: Belle Lerdworatawee
+EMAIL: bellelee@g.ucla.edu
+ID: 105375663
+
+-----------------------------------------------------------
+
+File Descriptions:
+
+lab4b.c: This file is the actual source code for the project and it uses API's to connect to the
+Beaglebone and read the temperature from a temperature sensor. It also polls for a button to
+see when the user wants to terminate the program.
+
+check.sh: This is a bash script that is invoked by "make check". It runs some simple test cases
+on lab4b such as checking that bogus arguments are invalid, if valid arguments will result in the
+correct return value, and that it logs commands correctly.
+
+Makefile: This file compiles all the source code, Makefile, and README into a compressed tar file.
+
+README: This file contains my beaglebone serial number as well as my personal information.
+
+Beaglebone serial number: BBGW17100610
+
+-----------------------------------------------------------
+
+Sources:
+https://stackoverflow.com/questions/15515088/how-to-check-if-string-starts-with-certain-string-in-c/15515276
+http://www.cplusplus.com/reference/cstring/strncmp/
+I was trying to see if there was a way to splice strings in C like in Python and I found this article. I needed
+a way to compare only part of the strings in the command to check what the command was. I learned about
+the function strncmp from the stack overflow post and then referenced the 2nd website for syntax and usage.
+
+https://www.geeksforgeeks.org/fprintf-in-c/
+https://www.php.net/manual/en/function.fopen.php
+I needed to print formatted strings to the file for the time so I looked at the documentation for fprint
+to see how to do it.
+
+https://iotdk.intel.com/docs/master/mraa/
+I looked at the documentation for mraa functions to check syntax and return values.
+
+I referenced all 3 TA's slides.
