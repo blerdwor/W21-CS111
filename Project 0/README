@@ -1,0 +1,51 @@
+NAME: Belle Lerdworatawee
+EMAIL: bellelee@g.ucla.edu
+ID: 105375663
+
+-----------------------------------------------------------
+
+File Descriptions:
+
+lab0.c: This file contains the actual C program to read from stdin and write to stdout. 
+
+Makefile: This file gives instructions to the make command on how to compile the code. It
+also can clean up the contents by removing the files that it creates and the tar file. It
+also will generate a new tarball containing all the necessary files. Lastly, it can test
+the script to make sure that the basic functionalities work. 
+
+README: This file contains all the information about the short program as well as my
+personal information.
+
+backtrace.png: This is an image of when I ran the program through gdb to see what the stack 
+looked like after a segmentation fault.
+
+breakpoint.png: This is an image of when I ran the program through gdb to check the segmentation
+fault. I tried to dereference a NULL pointer and the picture shows that the pointer contains 0x0
+which is NULL and thus it can't be dereferenced. 
+
+-----------------------------------------------------------
+
+Smoke Test Case Descriptions:
+
+# unrecognized arguments: check that program exits with status 1 when invoked with bad arguments
+# input existing file: check that program exists with status 0 with correct input and output files (output file is created)
+# input nonexistant file: check that program exits with status 2 when input file does not exist
+# test input file without read permissions: check that program exist with status 2 when the input cannot be opened
+# output file without read permissions: check that program exits with status 3 when the output file cannot be accessed
+# overwrite existing file: check that program exits with status 0 and overwrites an output file that contained bytes
+# catch: check that program exits with status 3 upon catching the segfault error with the SIGSEGV handler
+# segfault: check that the program exits with status 139 and that stdin is not copied to stdout
+# input with invalid file and segfault: check that program exits with status 2 and throws an input error 
+
+-----------------------------------------------------------
+
+Sources:
+https://www.informit.com/articles/article.aspx?p=175771&seqNum=3
+
+I used this source to better understand how the API getopt_long works. It showed lots of examples 
+of how to use it and explained the API's arguments and how to use them.
+
+https://unix.stackexchange.com/questions/255743/how-to-write-bash-script-in-makefile
+
+I referenced the syntax on this post to figure out how to write bash script in the Makefile
+for the smoke tests.
