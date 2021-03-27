@@ -1,0 +1,39 @@
+NAME: Belle Lerdworatawee
+EMAIL: bellelee@g.ucla.edu
+ID: 105375663
+
+-----------------------------------------------------------
+
+File Descriptions:
+
+my_beaglebone.jpg: This is screenshot of holding up my beaglebone.
+
+connected.png: This is a screenshot showing that I successfully connected to 
+the beaglebone through USB and configured wifi access.
+
+copy.png: This is a screenshot showing that I was able to successfully use SFTP
+through a 3rd party software (WinSCP) to transfer files from my local machine
+to the beaglebone.
+
+build_run.png: This is a screenshot showing that I was able to compile and run
+the "Hello World" program.
+
+git.png: This is a screenshot demonstrating that I successfully installed git and
+cloned a repository called CS-111.
+
+Makefile: This file compiles all the screenshots, Makefile, and README into a
+compressed tar file.
+
+README: This file contains my beaglebone serial number as well as my
+personal information.
+
+Beaglebone serial number: BBGW17100610
+Wifi MAC Address: 50-5B-C2-D1-F6-77
+
+-----------------------------------------------------------
+
+Sources:
+
+https://medium.com/@zageollc/updating-the-software-image-on-a-beaglebone-black-fc73ffcc700
+I was having issues with flashing the beaglebone and I followed this tutorial
+to fix the problem.
