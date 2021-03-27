@@ -1,0 +1,57 @@
+NAME: Belle Lerdworatawee
+EMAIL: bellelee@g.ucla.edu
+ID: 105375663
+
+-----------------------------------------------------------
+
+File Descriptions:
+
+lab1b-server.c: This file contains the actual C program. The program simulates a server 
+and shell program, which are connected through pipes. The parent process is the server
+and the child is the shell. The server must decompress incoming data before sending it
+to the shell and also compress data before sending it to the client (if the client had opted
+for compressed data). The shell then executes instructions normally. 
+
+lab1b-client.c: This file contains the actual C program. The program simulates a client. 
+It communicates with the server through a TCP socket. The client has the option to 
+compress its data and save on bandwidth during transmission. The user types in commands
+through through the client program and sees output from the shell accordingly. The client
+also has the option to log the data it sends and receives to a file for later viewing purposes.
+
+I had a lot of difficulty testing and debugging this lab. I found particular difficulty
+in learning how to use the zlib library and exactly where to compress and decompress
+data. Originally I had two unsigned char buffers at the top, however I was running into
+the issue where if the out_buf had leftover data in it, and the new incoming data was
+smaller than what was in there, the leftover bits weren't erased. So I decided to make
+the out_buf everytime I needed to use it, then it wouldn't have any residue.
+
+Makefile: This file gives instructions to the make command on how to compile the code. It
+also removes the files that it creates (namely the executables and the zipped file). It 
+also will generate a new tarball containing the Makefile, source code, and README, 
+compressing all the necessary files. 
+
+README: This file contains all the information about the program as well as my
+personal information.
+
+-----------------------------------------------------------
+
+Sources:
+
+https://web.archive.org/web/20200223023534/http://www.cs.rpi.edu/~moorthy/Courses/os98/Pgms/socket.html
+I read through this to get a deeper understanding of how to create a socket
+and used it as reference. I also looked through the examples to get an overall
+better understanding of how the client and server system should work.
+
+https://www.zlib.net/zlib_how.html
+I skimmed this to try to see how to use the functions to compress and decompress
+bytes. Originally I had a while loop to inflate/deflate the data; however I was
+running into errors with the data that was in buffer and I couldn't figure out
+how to fix this. After reading through the manual, I saw them use a do-while loop
+and decided to test it out.
+
+https://pubs.opengroup.org/onlinepubs/9699919799/functions/fprintf.html
+First I tried using fprintf to write the data to a log file, however, I ran into
+errors with the file descriptor. After some Googling, I found that actually dprintf
+is the function to use to write to files. 
+
+I referenced all 3 TA's slides.
