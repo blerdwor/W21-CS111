@@ -1,0 +1,36 @@
+NAME: Belle Lerdworatawee
+EMAIL: bellelee@g.ucla.edu
+ID: 105375663
+
+-----------------------------------------------------------
+
+File Descriptions:
+
+lab1a.c: This file contains the actual C program. The program simulates a terminal 
+when the --shell option is specified. The program forks a child (shell that runs commands)
+and then the parent program (terminal) redirects input from the keyboard through a pipe
+to the child, which then executes it and sends the output back to the parent to display.
+
+Makefile: This file gives instructions to the make command on how to compile the code. It
+also removes the files that it creates. It also will generate a new tarball containing, 
+compressing all the necessary files. 
+
+README: This file contains all the information about the program as well as my
+personal information.
+
+-----------------------------------------------------------
+
+Sources:
+
+https://www.gnu.org/software/libc/manual/html_node/Noncanon-Example.html
+I used this source to test out what non-canonical, no echo input looked like. 
+
+https://www.youtube.com/watch?v=uHH7nHkgZ4w
+I watched this YouTube video to get a better, visual understanding of how pipes
+work for communication and why we use them.
+
+https://www.youtube.com/watch?v=ss1-REMJ9GA
+I watched this video to get an overview of how fork() works in creating new
+processes.
+
+I also referenced all 3 TA's slides.
