@@ -2,7 +2,8 @@
 
 These are my solutions to the projects for CS 111 - Operating Systems Principles, taken during Winter 2021.
 
-Taught by Professor Harry Xu.
+Taught by Professor Harry Xu. 
+http://web.cs.ucla.edu/~harryxu/courses/111/winter21/ProjectGuide/index.htm
 
 | Project | Score  |
 | ------- | ------ |
